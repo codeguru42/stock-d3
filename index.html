@@ -3,8 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Stock Visualization with d3.js</title>
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
 </head>
 <body>
 
 </body>
 </html>
+<script>
+    d3.json('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=5min&apikey=demo')
+        .then(function (data) {
+            var time_series = data['Time Series (5min)'];
+            d3.select('body')
+                .data(Object.keys(time_series))
+                .enter().append('div')
+                .html(function(d) {
+                    return d;
+                });
+        });
+</script>
