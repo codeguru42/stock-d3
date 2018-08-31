@@ -14,11 +14,17 @@
     d3.json('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=5min&apikey=demo')
         .then(function (data) {
             var time_series = data['Time Series (5min)'];
+            var quotes = Object.keys(time_series).sort().map(
+                function (key) {
+                    time_series[key].time = key;
+                    return time_series[key];
+                }
+            );
             d3.select('body')
-                .data(Object.keys(time_series))
+                .data(quotes)
                 .enter().append('div')
-                .html(function(d) {
-                    return d;
+                .html(function(quote) {
+                    return JSON.stringify(quote);
                 });
         });
 </script>
