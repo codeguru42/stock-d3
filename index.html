@@ -7,72 +7,88 @@
   <script src="https://d3js.org/d3.v5.min.js"></script>
 </head>
 <body>
-<svg width="960" height="500"></svg>
+<div>
+  <svg width="960" height="500"></svg>
+</div>
+<div>
+  <label for="stock-symbol">Stock Symbol:</label>
+  <input type="text" id="stock-symbol">
+  <button id="btn-submit" onclick="submit()">Submit</button>
+</div>
 </body>
 </html>
 <script>
-  d3.json('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=5min&apikey=demo')
-    .then(function (data) {
-      var margin = {top: 20, right: 20, bottom: 30, left: 50};
-      var svg = d3.select('svg');
-      var g = svg.append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-      var width = +svg.attr('width') - margin.left - margin.right;
-      var height = +svg.attr('height') - margin.top - margin.bottom;
-      var time_series = data['Time Series (5min)'];
-      var parseTime = d3.timeParse('%Y-%m-%d %H:%M:%S');
+  function submit() {
+    var symbol = d3.select('#stock-symbol').property('value');
+    draw(symbol);
+  }
 
-      var x = d3.scaleTime()
-        .rangeRound([0, width]);
+  function draw(symbol) {
+    d3.json('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=' + symbol + '&interval=5min&apikey=942TX8GNKGBPPZ1J')
+      .then(function (data) {
+        var margin = {top: 20, right: 20, bottom: 30, left: 50};
+        var svg = d3.select('svg');
+        svg.selectAll('*').remove();
 
-      var y = d3.scaleLinear()
-        .rangeRound([height, 0]);
+        var g = svg.append('g')
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+        var width = +svg.attr('width') - margin.left - margin.right;
+        var height = +svg.attr('height') - margin.top - margin.bottom;
+        var time_series = data['Time Series (5min)'];
+        var parseTime = d3.timeParse('%Y-%m-%d %H:%M:%S');
 
-      var line = d3.line()
-        .x(function (d) {
-          return x(d.time);
-        })
-        .y(function (d) {
-          return y(d['4. close'])
-        });
+        var x = d3.scaleTime()
+          .rangeRound([0, width]);
 
-      var quotes = Object.keys(time_series).sort().map(
-        function (key) {
-          time_series[key].time = parseTime(key);
-          return time_series[key];
-        }
-      );
+        var y = d3.scaleLinear()
+          .rangeRound([height, 0]);
 
-      x.domain(d3.extent(quotes, function (d) {
-        return d.time;
-      }));
-      y.domain(d3.extent(quotes, function (d) {
-        return d['4. close'];
-      }));
+        var line = d3.line()
+          .x(function (d) {
+            return x(d.time);
+          })
+          .y(function (d) {
+            return y(d['4. close'])
+          });
 
-      g.append('g')
-        .attr('transform', 'translate(0,' + height + ')')
-        .call(d3.axisBottom(x))
-        .select('.domain')
-        .remove();
+        var quotes = Object.keys(time_series).sort().map(
+          function (key) {
+            time_series[key].time = parseTime(key);
+            return time_series[key];
+          }
+        );
 
-      g.append('g')
-        .call(d3.axisLeft(y))
-        .append('text')
-        .attr('fill', '#000')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', 6)
-        .attr('dy', '0.71em')
-        .attr('text-anchor', 'end')
-        .text('Price (USD)');
+        x.domain(d3.extent(quotes, function (d) {
+          return d.time;
+        }));
+        y.domain(d3.extent(quotes, function (d) {
+          return d['4. close'];
+        }));
 
-      g.append('path')
-        .datum(quotes)
-        .attr('fill', 'none')
-        .attr('stroke', 'steelblue')
-        .attr('stroke-linejoin', 'round')
-        .attr('stroke-linecap', 'round')
-        .attr('stroke-width', 1.5)
-        .attr('d', line);
-    });
+        g.append('g')
+          .attr('transform', 'translate(0,' + height + ')')
+          .call(d3.axisBottom(x))
+          .select('.domain')
+          .remove();
+
+        g.append('g')
+          .call(d3.axisLeft(y))
+          .append('text')
+          .attr('fill', '#000')
+          .attr('transform', 'rotate(-90)')
+          .attr('y', 6)
+          .attr('dy', '0.71em')
+          .attr('text-anchor', 'end')
+          .text('Price (USD)');
+
+        g.append('path')
+          .datum(quotes)
+          .attr('fill', 'none')
+          .attr('stroke', 'steelblue')
+          .attr('stroke-linejoin', 'round')
+          .attr('stroke-linecap', 'round')
+          .attr('stroke-width', 1.5)
+          .attr('d', line);
+      });
+  }
 </script>
