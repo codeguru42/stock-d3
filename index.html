@@ -48,13 +48,20 @@
             return x(d.time);
           })
           .y(function (d) {
-            return y(d['4. close'])
+            return y(d.close)
           });
 
         var quotes = Object.keys(time_series).sort().map(
           function (key) {
-            time_series[key].time = parseTime(key);
-            return time_series[key];
+            var data = time_series[key];
+            return {
+              time: parseTime(key),
+              open: Number(data['1. open']),
+              high: Number(data['2. high']),
+              low: Number(data['3. low']),
+              close: Number(data['4. close']),
+              volume: Number(data['5. volume']),
+            };
           }
         );
 
@@ -62,7 +69,7 @@
           return d.time;
         }));
         y.domain(d3.extent(quotes, function (d) {
-          return d['4. close'];
+          return d.close;
         }));
 
         g.append('g')
